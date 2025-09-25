@@ -1,0 +1,226 @@
+-- Descrição do Desafio oficina mecânica
+
+-- Criação do banco de dados e uso
+CREATE DATABASE OficinaMecanica;
+USE OficinaMecanica;
+
+-- Tabela Cliente
+CREATE TABLE Cliente (
+    IdCliente INT PRIMARY KEY AUTO_INCREMENT,
+    Nome VARCHAR(45) NOT NULL,
+    Endereço VARCHAR(45),
+    Telefone CHAR(14),
+    CPF CHAR(11) NOT NULL UNIQUE
+);
+
+-- Tabela Veículo
+CREATE TABLE Veículo (
+    IdVeículo INT PRIMARY KEY AUTO_INCREMENT,
+    Placa CHAR(8) NOT NULL UNIQUE,
+    Modelo VARCHAR(45),
+    Ano INT,
+    Cor VARCHAR(45),
+    Cliente_IdCliente INT,
+    FOREIGN KEY (Cliente_IdCliente) REFERENCES Cliente(IdCliente)
+);
+
+-- Tabela Mecânico
+CREATE TABLE Mecânico (
+    IdMecânico INT PRIMARY KEY AUTO_INCREMENT,
+    CódigoDoMecânico VARCHAR(45),
+    Nome VARCHAR(45),
+    Endereço VARCHAR(45),
+    Especialidade VARCHAR(45)
+);
+
+-- Tabela Equipe
+CREATE TABLE Equipe (
+    IdEquipe INT PRIMARY KEY AUTO_INCREMENT,
+    NomeDaEquipe VARCHAR(45),
+    DataDeIngresso DATE
+);
+
+-- Tabela Mecânicos da Equipe (Tabela de Junção)
+CREATE TABLE Mecânicos_da_Equipe (
+    Equipe_IdEquipe INT,
+    Mecânico_IdMecânico INT,
+    PRIMARY KEY (Equipe_IdEquipe, Mecânico_IdMecânico),
+    FOREIGN KEY (Equipe_IdEquipe) REFERENCES Equipe(IdEquipe),
+    FOREIGN KEY (Mecânico_IdMecânico) REFERENCES Mecânico(IdMecânico)
+);
+
+-- Tabela Ordem de Serviço (OS)
+CREATE TABLE Ordem_de_Serviço (
+    IdOrdemDeServiço INT PRIMARY KEY AUTO_INCREMENT,
+    Número_da_OS VARCHAR(45) NOT NULL UNIQUE,
+    Data_de_emissão DATE,
+    Data_de_conclusão DATE,
+    Status_da_OS VARCHAR(45),
+    Valor_Total DECIMAL(10, 2),
+    Forma_de_Pagamento VARCHAR(45),
+    Autorização_do_Cliente VARCHAR(45),
+    Veículo_IdVeículo INT,
+    Equipe_IdEquipe INT,
+    FOREIGN KEY (Veículo_IdVeículo) REFERENCES Veículo(IdVeículo),
+    FOREIGN KEY (Equipe_IdEquipe) REFERENCES Equipe(IdEquipe)
+);
+
+-- Tabela Serviço
+CREATE TABLE Serviço (
+    IdServiço INT PRIMARY KEY AUTO_INCREMENT,
+    Nome_do_Serviço VARCHAR(45),
+    Descrição_do_Serviço TEXT,
+    Valor_do_Serviço DECIMAL(10, 2)
+);
+
+-- Tabela Mão de Obra (TMO)
+CREATE TABLE Tabela_de_Mão_de_Obra (
+    IdTMO INT PRIMARY KEY AUTO_INCREMENT,
+    Valor_da_M_O DECIMAL(10, 2),
+    Tempo_Estimado FLOAT,
+    Serviço_IdServiço INT,
+    FOREIGN KEY (Serviço_IdServiço) REFERENCES Serviço(IdServiço)
+);
+
+-- Tabela Peça
+CREATE TABLE Peça (
+    IdPeça INT PRIMARY KEY AUTO_INCREMENT,
+    Nome_da_peça VARCHAR(45),
+    Valor_da_peça DECIMAL(10, 2),
+    Quantidade_da_peça INT
+);
+
+-- Tabela Serviço com peça (Tabela de Junção)
+CREATE TABLE Serviço_com_peça (
+    Serviço_IdServiço INT,
+    Peça_IdPeça INT,
+    PRIMARY KEY (Serviço_IdServiço, Peça_IdPeça),
+    FOREIGN KEY (Serviço_IdServiço) REFERENCES Serviço(IdServiço),
+    FOREIGN KEY (Peça_IdPeça) REFERENCES Peça(IdPeça)
+);
+
+-- Tabela Quem_executa_o_serviço (Tabela de Junção)
+CREATE TABLE Quem_executa_o_serviço (
+    Serviço_IdServiço INT,
+    Ordem_de_Serviço_IdOrdemDeServiço INT,
+    PRIMARY KEY (Serviço_IdServiço, Ordem_de_Serviço_IdOrdemDeServiço),
+    FOREIGN KEY (Serviço_IdServiço) REFERENCES Serviço(IdServiço),
+    FOREIGN KEY (Ordem_de_Serviço_IdOrdemDeServiço) REFERENCES Ordem_de_Serviço(IdOrdemDeServiço)
+);
+
+-- Inserir dados na tabela Cliente
+INSERT INTO Cliente (Nome, Endereço, Telefone, CPF) VALUES
+('João da Silva', 'Rua A, 10', '11987654321', '11122233344'),
+('Maria Santos', 'Avenida B, 20', '21998765432', '22233344455'),
+('Pedro Souza', 'Rua C, 30', '31976543210', '33344455566'),
+('Ana Oliveira', 'Praça D, 40', '41965432109', '44455566677'),
+('Carlos Pereira', 'Estrada E, 50', '51954321098', '55566677788'),
+('Mariana Costa', 'Rua F, 60', '61943210987', '66677788899'),
+('Ricardo Almeida', 'Avenida G, 70', '71932109876', '77788899900'),
+('Juliana Lima', 'Rua H, 80', '81921098765', '88899900011'),
+('Felipe Gomes', 'Travessa I, 90', '91910987654', '99900011122'),
+('Laura Martins', 'Rodovia J, 100', '11912345678', '00011122233');
+
+-- Inserir dados na tabela Veículo
+INSERT INTO Veículo (Placa, Modelo, Ano, Cor, Cliente_IdCliente) VALUES
+('ABC1234', 'Volkswagen Gol', 2010, 'Prata', 1),
+('DEF5678', 'Chevrolet Onix', 2018, 'Preto', 2),
+('GHI9012', 'Ford Ka', 2015, 'Vermelho', 3),
+('JKL3456', 'Fiat Uno', 2008, 'Branco', 4),
+('MNO7890', 'Hyundai HB20', 2020, 'Azul', 5),
+('PQR1122', 'Toyota Corolla', 2022, 'Cinza', 6),
+('STU3344', 'Honda Civic', 2019, 'Prata', 7),
+('VWX5566', 'Nissan Kicks', 2021, 'Branco', 8),
+('YZA7788', 'Renault Kwid', 2023, 'Laranja', 9),
+('BCD9900', 'Jeep Renegade', 2022, 'Verde', 10);
+
+-- Inserir dados na tabela Mecânico
+INSERT INTO Mecânico (CódigoDoMecânico, Nome, Endereço, Especialidade) VALUES
+('MEC001', 'Luiz Silva', 'Rua das Oficinas, 1', 'Mecânica Geral'),
+('MEC002', 'Marcos Pereira', 'Av. dos Motores, 2', 'Eletricista'),
+('MEC003', 'Ronaldo Santos', 'Rua das Ferramentas, 3', 'Funilaria'),
+('MEC004', 'Fernando Souza', 'Rua do Freio, 4', 'Freios e Suspensão'),
+('MEC005', 'Gustavo Oliveira', 'Av. do Carburador, 5', 'Motor'),
+('MEC006', 'Cláudio Ferreira', 'Rua da Chave, 6', 'Alinhamento e Balanceamento'),
+('MEC007', 'Paulo Rodrigues', 'Travessa da Graxa, 7', 'Revisões'),
+('MEC008', 'Sérgio Costa', 'Rua do Óleo, 8', 'Troca de Óleo'),
+('MEC009', 'Daniel Gomes', 'Av. da Parafuso, 9', 'Transmissão'),
+('MEC010', 'Alex Martins', 'Rua da Solda, 10', 'Escapamento');
+
+-- Inserir dados na tabela Equipe
+INSERT INTO Equipe (NomeDaEquipe, DataDeIngresso) VALUES
+('Equipe Alpha', '2020-01-15'),
+('Equipe Beta', '2021-03-20'),
+('Equipe Gama', '2022-05-10'),
+('Equipe Delta', '2021-08-01'),
+('Equipe Omega', '2023-02-25'),
+('Equipe Épsilon', '2022-11-12'),
+('Equipe Zeta', '2021-09-09'),
+('Equipe Teta', '2023-01-30'),
+('Equipe Iota', '2022-07-07'),
+('Equipe Sigma', '2020-06-05');
+
+-- Inserir dados na tabela Mecânicos da Equipe (Tabela de Junção)
+INSERT INTO Mecânicos_da_Equipe (Equipe_IdEquipe, Mecânico_IdMecânico) VALUES
+(1, 1), (1, 2), (2, 3), (2, 4), (3, 5), (3, 6), (4, 7), (4, 8), (5, 9), (5, 10);
+
+-- Inserir dados na tabela Ordem de Serviço (OS)
+INSERT INTO Ordem_de_Serviço (Número_da_OS, Data_de_emissão, Data_de_conclusão, Status_da_OS, Valor_Total, Forma_de_Pagamento, Autorização_do_Cliente, Veículo_IdVeículo, Equipe_IdEquipe) VALUES
+('OS2023001', '2023-09-20', '2023-09-22', 'Concluído', 550.00, 'Cartão de Crédito', 'Sim', 1, 1),
+('OS2023002', '2023-09-21', '2023-09-23', 'Concluído', 320.50, 'Pix', 'Sim', 2, 2),
+('OS2023003', '2023-09-22', '2023-09-25', 'Em Andamento', 1500.00, 'Boleto', 'Sim', 3, 3),
+('OS2023004', '2023-09-22', NULL, 'Aguardando Aprovação', 850.75, 'A Definir', 'Não', 4, 4),
+('OS2023005', '2023-09-23', '2023-09-23', 'Concluído', 120.00, 'Dinheiro', 'Sim', 5, 5),
+('OS2023006', '2023-09-23', NULL, 'Em Andamento', 980.00, 'Cartão de Crédito', 'Sim', 6, 1),
+('OS2023007', '2023-09-24', '2023-09-24', 'Concluído', 250.00, 'Pix', 'Sim', 7, 2),
+('OS2023008', '2023-09-24', NULL, 'Em Andamento', 750.00, 'Cartão de Crédito', 'Sim', 8, 3),
+('OS2023009', '2023-09-24', '2023-09-25', 'Concluído', 450.00, 'Dinheiro', 'Sim', 9, 4),
+('OS2023010', '2023-09-25', NULL, 'Em Andamento', 600.00, 'Boleto', 'Sim', 10, 5);
+
+-- Inserir dados na tabela Serviço
+INSERT INTO Serviço (Nome_do_Serviço, Descrição_do_Serviço, Valor_do_Serviço) VALUES
+('Troca de Óleo', 'Substituição de óleo e filtro do motor', 80.00),
+('Alinhamento', 'Alinhamento de direção das rodas', 120.00),
+('Balanceamento', 'Balanceamento das rodas', 50.00),
+('Revisão de Freios', 'Verificação e troca de pastilhas e discos de freio', 250.00),
+('Troca de Bateria', 'Instalação de nova bateria automotiva', 400.00),
+('Suspensão', 'Manutenção completa no sistema de suspensão', 600.00),
+('Motor', 'Diagnóstico e reparo de problemas no motor', 1200.00),
+('Escapamento', 'Reparo ou substituição do sistema de escapamento', 300.00),
+('Pneus', 'Troca de pneus e calibração', 350.00),
+('Troca de Correia', 'Substituição da correia dentada', 280.00);
+
+-- Inserir dados na tabela Tabela de Mão de Obra
+INSERT INTO Tabela_de_Mão_de_Obra (Valor_da_M_O, Tempo_Estimado, Serviço_IdServiço) VALUES
+(50.00, 0.5, 1),
+(70.00, 1.0, 2),
+(30.00, 0.5, 3),
+(150.00, 2.0, 4),
+(100.00, 1.5, 5),
+(350.00, 3.0, 6),
+(800.00, 8.0, 7),
+(150.00, 1.5, 8),
+(80.00, 1.0, 9),
+(180.00, 2.5, 10);
+
+-- Inserir dados na tabela Peça
+INSERT INTO Peça (Nome_da_peça, Valor_da_peça, Quantidade_da_peça) VALUES
+('Óleo do Motor', 50.00, 100),
+('Filtro de Óleo', 30.00, 50),
+('Pastilha de Freio', 120.00, 30),
+('Disco de Freio', 150.00, 25),
+('Bateria 60ah', 300.00, 20),
+('Amortecedor Dianteiro', 250.00, 15),
+('Vela de Ignição', 45.00, 40),
+('Filtro de Ar', 25.00, 60),
+('Pneu 175/70 R13', 200.00, 50),
+('Correia Dentada', 100.00, 35);
+
+-- Inserir dados na tabela Serviço_com_peça (Tabela de Junção)
+INSERT INTO Serviço_com_peça (Serviço_IdServiço, Peça_IdPeça) VALUES
+(1, 1), (1, 2), (4, 3), (4, 4), (5, 5), (6, 6), (7, 7), (7, 8), (9, 9), (10, 10);
+
+-- Inserir dados na tabela Quem_executa_o_serviço (Tabela de Junção)
+INSERT INTO Quem_executa_o_serviço (Serviço_IdServiço, Ordem_de_Serviço_IdOrdemDeServiço) VALUES
+(1, 1), (4, 1), (2, 2), (5, 3), (6, 4), (1, 5), (7, 6), (3, 7), (8, 8), (9, 9);
+

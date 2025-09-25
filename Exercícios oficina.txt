@@ -1,0 +1,73 @@
+-- Execícios
+
+/* Recuperações simples com SELECT Statement;
+Filtros com WHERE Statement;
+Crie expressões para gerar atributos derivados;
+Defina ordenações dos dados com ORDER BY;
+Condições de filtros aos grupos – HAVING Statement;
+Crie junções entre tabelas para fornecer uma perspectiva mais complexa dos dados;*/
+
+USE oficinamecanica;
+
+-- Encontrar todos os veículos de um cliente específico (ex: CPF '11122233344')
+SELECT * FROM Veículo
+WHERE Cliente_IdCliente = (SELECT IdCliente FROM Cliente WHERE CPF = '11122233344');
+
+-- Listar os serviços que custam mais de R$ 200,00
+SELECT Nome_do_Serviço, Valor_do_Serviço FROM Serviço
+WHERE Valor_do_Serviço > 200.00;
+
+-- Recuperar as ordens de serviço que ainda estão "Em Andamento"
+SELECT Número_da_OS, Status_da_OS FROM Ordem_de_Serviço
+WHERE Status_da_OS = 'Em Andamento';
+
+-- Calcular o valor total de uma peça, considerando a quantidade
+SELECT Nome_da_peça, Valor_da_peça, Quantidade_da_peça, (Valor_da_peça * Quantidade_da_peça) AS Valor_Total_Estoque
+FROM Peça;
+
+-- Gerar um nome completo para os mecânicos
+SELECT CONCAT(Nome, ' - ', Especialidade) AS Mecanico_Especializado
+FROM Mecânico;
+
+-- Listar os mecânicos por nome em ordem alfabética
+SELECT Nome, Especialidade FROM Mecânico
+ORDER BY Nome ASC;
+
+-- Encontrar as ordens de serviço com maior valor total primeiro
+SELECT Número_da_OS, Valor_Total FROM Ordem_de_Serviço
+ORDER BY Valor_Total DESC;
+
+-- Encontrar as equipes que têm mais de um mecânico
+SELECT Equipe_IdEquipe, COUNT(Mecânico_IdMecânico) AS Total_Mecânicos
+FROM Mecânicos_da_Equipe
+GROUP BY Equipe_IdEquipe
+HAVING Total_Mecânicos > 1;
+
+-- Listar os serviços que tiveram um valor total de mão de obra estimado acima de 100
+SELECT Serviço_IdServiço, SUM(Valor_da_M_O) AS Valor_Total_Mao_de_Obra
+FROM Tabela_de_Mão_de_Obra
+GROUP BY Serviço_IdServiço
+HAVING Valor_Total_Mao_de_Obra > 100.00;
+
+-- Relacionar o nome do cliente ao modelo do seu veículo
+SELECT c.Nome AS NomeCliente, v.Modelo AS ModeloVeículo, v.Placa
+FROM Cliente c
+JOIN Veículo v ON c.IdCliente = v.Cliente_IdCliente;
+
+-- Encontrar o nome dos mecânicos e suas respectivas equipes
+SELECT m.Nome AS NomeMecanico, e.NomeDaEquipe AS NomeEquipe
+FROM Mecânico m
+JOIN Mecânicos_da_Equipe me ON m.IdMecânico = me.Mecânico_IdMecânico
+JOIN Equipe e ON me.Equipe_IdEquipe = e.IdEquipe;
+
+-- Listar o número da OS, o nome do serviço e o valor de cada serviço dentro da OS
+SELECT os.Número_da_OS, s.Nome_do_Serviço, s.Valor_do_Serviço
+FROM Ordem_de_Serviço os
+JOIN Quem_executa_o_serviço qes ON os.IdOrdemDeServiço = qes.Ordem_de_Serviço_IdOrdemDeServiço
+JOIN Serviço s ON qes.Serviço_IdServiço = s.IdServiço;
+
+-- Exibir o nome do serviço, o nome da peça utilizada e o valor da peça
+SELECT s.Nome_do_Serviço, p.Nome_da_peça, p.Valor_da_peça
+FROM Serviço s
+JOIN serviço_com_peça scp ON s.IdServiço = scp.Serviço_IdServiço
+JOIN Peça p ON scp.Peça_IdPeça = p.IdPeça;
